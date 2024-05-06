@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Line Graph</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    
+    <div class="container-fluid">
+        <h1>Total Population at birth 2020 and 2021</h1>
+        <div class="row">
+          <div class="col-6" id="area1"></div>
+          <div class="col-6">
+            <p>The data provides a comprehensive snapshot of total population at birth across numerous countries for the years 2020 and 2021. Notable trends emerge, showcasing both subtle fluctuations and more significant shifts in population figures. For instance, Australia saw a marginal increase in its birth rate from 83.2 to 83.3, indicative of relatively stable demographic patterns. In contrast, Belgium experienced a notable uptick from 80.8 to 81.9, signaling potential changes in birth rates within the region. These variations underscore the diverse factors influencing population dynamics, from socio-economic conditions to cultural norms and government policies.</p>
+            <p>Further analysis reveals intriguing contrasts among nations. While some countries witnessed modest changes, others experienced more pronounced shifts in birth rates. For instance, Hungary observed a substantial decline from 75.7 to 74.3, suggesting potential challenges in sustaining population growth. Conversely, Japan's estimated value dropped marginally from 84.6 to 84.5, reflecting the complexities of demographic transitions in highly developed societies. Such disparities highlight the importance of contextualizing demographic data within broader societal contexts to understand the underlying drivers of population change.            </p>
+        </div>
+        </div>
+        <h1>World Total Population in 2021</h1>
+        <div class="row">
+            <div class="col-6">
+              Explanation for the world map
+          </div>
+          <div class="col-6" id="area2">World map</div>
+          </div>
+      </div>
+    <script>
+        d3.csv("LifeExpectancyAtBirthTotalPop2021_2020.csv").then(function(data) {
+            // Filter data for 2020 and 2021
+            var data2020 = data.filter(function(d) { return d.Year === "2020"; });
+            var data2021 = data.filter(function(d) { return d.Year === "2021"; });
+
+            // Set up margins and dimensions
+            var margin = {top: 20, right: 30, bottom: 30, left: 60};
+            var width = 800 - margin.left - margin.right;
+            var height = 600 - margin.top - margin.bottom;
+
+            // Create SVG element
+            var svg = d3.select("#area1")
+                        .append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // Set up scales
+            var xScale = d3.scaleBand()
+                            .domain(data2020.map(function(d) { return d.Country; }))
+                            .range([0, width])
+                            .padding(0.1);
+
+            var yScale = d3.scaleLinear()
+                            .domain([0, d3.max(data, function(d) { return +d.Value; })])
+                            .range([height, 0]);
+
+            // Draw x axis
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+
+            // Draw y axis
+            svg.append("g")
+                .call(d3.axisLeft(yScale));
+
+            // Draw line for 2020
+            svg.append("path")
+                .datum(data2020)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 1.5)
+                .attr("d", d3.line()
+                            .x(function(d) { return xScale(d.Country) + xScale.bandwidth() / 2; })
+                            .y(function(d) { return yScale(+d.Value); }));
+
+            // Draw line for 2021
+            svg.append("path")
+                .datum(data2021)
+                .attr("fill", "none")
+                .attr("stroke", "red")
+                .attr("stroke-width", 1.5)
+                .attr("d", d3.line()
+                            .x(function(d) { return xScale(d.Country) + xScale.bandwidth() / 2; })
+                            .y(function(d) { return yScale(+d.Value); }));
+        });
+
+    </script>
+</body>
+</html>
