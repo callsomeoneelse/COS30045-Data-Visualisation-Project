@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Map of All-Cause Deaths</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+      }
+      .tooltip,
+      .graph-tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        border: 1px solid #333;
+        border-radius: 8px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 10;
+      }
+      #mapContainer {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid #333;
+        padding: 10px;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+        margin-bottom: 20px;
+      }
+      #lineGraphContainer {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      svg {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        display: block;
+        max-width: 100%;
+        height: auto;
+        background-color: #f5f5dc;
+      }
+      h1,
+      h2 {
+        text-align: center;
+        color: #4a5568;
+      }
+      .navbar {
+        background-color: #e2e8f0;
+        margin-bottom: 20px;
+      }
+      .navbar .navbar-nav .nav-link {
+        color: #4a5568;
+      }
+      .navbar .navbar-nav .nav-link:hover {
+        color: #2d3748;
+        text-decoration: none;
+      }
+      button {
+        background-color: #4a5568;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #2d3748;
+      }
+      select {
+        border-radius: 20px;
+        padding: 5px;
+        background-color: #edf2f7;
+      }
+      select:hover {
+        background-color: #e2e8f0;
+      }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">OECD Health Statistics</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="#home">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="data.html">Data</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="insights.html">Insights</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container py-4">
+      <div id="home" class="row">
+        <div class="col-12">
+          <h1>
+            Health Insights: Understanding the Impact of Health Expenditure
+          </h1>
+          <h2>
+            Explore the relationship between health spending, employment and
+            preventable mortality using OECD statistics
+          </h2>
+        </div>
+      </div>
+      <div id="data" class="row my-4">
+        <div class="col-12">
+          <figure>
+            <div id="mapContainer">
+              <svg></svg>
+              <div class="tooltip"></div>
+            </div>
+            <figcaption class="text-center mt-2">
+              Global all-cause mortality rates in 2023. Data highlights
+              disparities across countries and the effectiveness of health
+              systems worldwide.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-auto text-center">
+          <div>Choose a Country:</div>
+          <select id="countrySelect" class="form-select w-auto mt-2">
+            <option value="all">All</option>
+          </select>
+        </div>
+      </div>
+      <br />
+      <div id="insights" class="row">
+        <div class="col-6">
+          <div class="justify-content">
+            <p>
+              In a revealing snapshot of global health trends, the latest data
+              from 2023 shows notable disparities in all-cause mortality rates
+              across different countries. This data serves as a vital indicator
+              of the effectiveness of health systems worldwide.
+            </p>
+            <p>
+              The United States reported a high of 69,134 deaths in the first
+              week of 2023, with numbers slightly decreasing as the weeks
+              progressed. This trend reflects the ongoing challenges in
+              addressing broad public health concerns. Canada, meanwhile, saw a
+              reduction from 7,170 deaths at the start of the year to 6,590 by
+              week five, hinting at some success in public health interventions.
+            </p>
+            <p>
+              European countries like Germany and France reported high numbers
+              but showed signs of potential stabilization, with Germany's weekly
+              deaths decreasing from 25,382 to 21,070 and France's from 15,768
+              to 13,250.
+            </p>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="justify-content">
+            <p>
+              Smaller nations such as Iceland and Luxembourg demonstrated the
+              effectiveness of their health care systems, with Iceland reporting
+              deaths in the mere double digits. Conversely, in Luxembourg,
+              mortality rates decreased from 136 to 76 deaths over five weeks,
+              reflecting effective health management.
+            </p>
+            <p>
+              Down under, Australia maintained a consistent mortality rate
+              around 3,300, showcasing stable public health conditions, whereas
+              New Zealand impressed with numbers consistently below 800.
+            </p>
+            <p>
+              This global mortality overview underscores the varied impacts of
+              health policies and the importance of tailored public health
+              strategies to meet each nation's unique challenges. As the year
+              unfolds, these statistics will be pivotal for policymakers aiming
+              to enhance health outcomes and tackle the intrinsic challenges
+              within their health care systems.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <div id="lineGraphContainer">
+            <svg></svg>
+            <div class="graph-tooltip"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- World Map Script -->
+    <script>
+      const svg = d3.select("#mapContainer svg");
+      const tooltip = d3.select(".tooltip");
+      const container = document.getElementById("mapContainer");
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      const zoom = d3
+        .zoom()
+        .scaleExtent([1, 8])
+        .on("zoom", (event) => {
+          svg.selectAll("path").attr("transform", event.transform);
+        });
+      svg.attr("width", width).attr("height", height).call(zoom);
+
+      const projection = d3
+        .geoMercator()
+        .scale(130)
+        .translate([width / 2, height / 1.5]);
+      const path = d3.geoPath().projection(projection);
+
+      d3.json(
+        "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"
+      ).then(function (world) {
+        const filteredCountries = world.features.filter(
+          (d) => d.properties.name !== "Antarctica"
+        );
+
+        d3.csv("DataSets/HEALTH_MORTALITY.csv").then(function (data) {
+          data.forEach((d) => (d.Value = +d.Value));
+          const deathData = d3.rollup(
+            data,
+            (v) => d3.sum(v, (d) => d.Value),
+            (d) => d.Country
+          );
+          const countriesWithData = filteredCountries.map((d) => {
+            const deaths = deathData.get(d.properties.name) || 0;
+            return { ...d, totalDeaths: deaths };
+          });
+
+          const select = d3
+            .select("#countrySelect")
+            .on("change", function (event) {
+              const countryName = this.value;
+              zoomToCountry(countryName);
+            });
+          select
+            .selectAll("option")
+            .data(countriesWithData.filter((d) => d.totalDeaths > 0))
+            .enter()
+            .append("option")
+            .attr("value", (d) => d.properties.name)
+            .text((d) => d.properties.name);
+
+          function zoomToCountry(countryName) {
+            const country = countriesWithData.find(
+              (d) => d.properties.name === countryName
+            );
+            const [[x0, y0], [x1, y1]] = path.bounds(country);
+            svg
+              .transition()
+              .duration(750)
+              .call(
+                zoom.transform,
+                d3.zoomIdentity
+                  .translate(width / 2, height / 2)
+                  .scale(
+                    Math.min(
+                      8,
+                      0.9 / Math.max((x1 - x0) / width, (y1 - y0) / height)
+                    )
+                  )
+                  .translate(-(x0 + x1) / 2, -(y0 + y1) / 2)
+              );
+          }
+
+          const colorScale = d3
+            .scaleSequentialLog((t) => d3.interpolatePlasma(t * 0.8 + 0.1))
+            .domain([1, d3.max(countriesWithData, (d) => d.totalDeaths)]);
+          svg
+            .selectAll("path")
+            .data(countriesWithData)
+            .join("path")
+            .attr("d", path)
+            .attr("fill", (d) =>
+              d.totalDeaths > 0 ? colorScale(d.totalDeaths) : "#dcdcdc"
+            )
+            .attr("stroke", "#333")
+            .attr("stroke-width", 0.5)
+            .on("mouseover", function (event, d) {
+              tooltip.transition().duration(200).style("opacity", 0.9);
+              tooltip
+                .html(d.properties.name + "<br/>" + "Deaths: " + d.totalDeaths)
+                .style("left", event.pageX - 300 + "px")
+                .style("top", event.pageY - 120 + "px");
+            })
+            .on("mouseout", function (d) {
+              tooltip.transition().duration(500).style("opacity", 0);
+            });
+        });
+      });
+    </script>
+
+    <!-- Line Graph Script -->
+    <script>
+      const lineSvg = d3.select("#lineGraphContainer svg"),
+        lineGraphMargin = { top: 20, right: 30, bottom: 50, left: 60 },
+        lineGraphWidth = 960 - lineGraphMargin.left - lineGraphMargin.right,
+        lineGraphHeight = 600 - lineGraphMargin.top - lineGraphMargin.bottom;
+
+      lineSvg.attr("width", 960).attr("height", 600); // Ensure SVG has specific size
+
+      const gLine = lineSvg
+        .append("g")
+        .attr(
+          "transform",
+          `translate(${lineGraphMargin.left},${lineGraphMargin.top})`
+        );
+
+      const graphTooltip = d3.select(".graph-tooltip"); // Ensure tooltip is defined
+
+      d3.csv("DataSets/HEALTH_PROC.csv").then(function (data) {
+        data.forEach((d) => {
+          d.Year = +d.Year;
+          d.Value = +d.Value;
+        });
+        data.sort((a, b) => a.Year - b.Year);
+
+        const xScale = d3
+          .scaleLinear()
+          .domain(d3.extent(data, (d) => d.Year))
+          .range([0, lineGraphWidth]);
+
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, d3.max(data, (d) => d.Value)])
+          .range([lineGraphHeight, 0]);
+
+        gLine
+          .append("g")
+          .attr("transform", `translate(0,${lineGraphHeight})`)
+          .call(d3.axisBottom(xScale).tickFormat(d3.format("d")));
+
+        gLine.append("g").call(d3.axisLeft(yScale));
+
+        // Add X axis label
+        gLine
+          .append("text")
+          .attr("text-anchor", "end")
+          .attr("x", lineGraphWidth / 2)
+          .attr("y", lineGraphHeight + lineGraphMargin.bottom - 10)
+          .text("Year");
+
+        // Add Y axis label
+        gLine
+          .append("text")
+          .attr("text-anchor", "end")
+          .attr("transform", "rotate(-90)")
+          .attr("y", -lineGraphMargin.left + 50)
+          .attr("x", -lineGraphHeight / 2)
+          .text("Number of Case");
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+        const line = d3
+          .line()
+          .x((d) => xScale(d.Year))
+          .y((d) => yScale(d.Value));
+
+        const dataByVar = d3.group(data, (d) => d.VAR);
+        dataByVar.forEach((values, key) => {
+          const path = gLine
+            .append("path")
+            .datum(values)
+            .attr("fill", "none")
+            .attr("stroke", color(key))
+            .attr("stroke-width", 1.5)
+            .attr("d", line);
+
+          gLine
+            .selectAll("circle.key-" + key.replace(/\s+/g, "-"))
+            .data(values)
+            .enter()
+            .append("circle")
+            .attr("class", "key-" + key.replace(/\s+/g, "-"))
+            .attr("cx", (d) => xScale(d.Year))
+            .attr("cy", (d) => yScale(d.Value))
+            .attr("r", 5)
+            .attr("fill", color(key))
+            .on("mouseover", function (event, d) {
+              graphTooltip.transition().duration(200).style("opacity", 0.9);
+              graphTooltip
+                .html(
+                  "Variable: " +
+                    key +
+                    "<br>Year: " +
+                    d.Year +
+                    "<br>Value: " +
+                    d.Value
+                )
+                .style("left", event.pageX + 15 + "px")
+                .style("top", event.pageY - 28 + "px");
+            })
+            .on("mouseout", function (d) {
+              graphTooltip.transition().duration(500).style("opacity", 0);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
